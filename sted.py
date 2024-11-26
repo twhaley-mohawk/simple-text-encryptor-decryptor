@@ -5,7 +5,7 @@ import sys
 import base64
 from gooey import Gooey, GooeyParser
 
-@Gooey(program_name='Simple Text Encryptor/Decryptor')
+@Gooey(program_name='Simple Text Encryptor/Decryptor', clear_before_run=True, show_restart_button=False, terminal_font_color="#ffffff", default_size=(800, 500))
 def parse_arguments_and_select_mode():
     parser = GooeyParser(
         description='A simple text encryptor/decryptor script by Taylor Whaley for Python for Networking course, 2024')
