@@ -3,27 +3,27 @@ from cryptography.fernet import Fernet
 import argparse
 import os
 import sys
+from gooey import Gooey, GooeyParser
 
+@Gooey(program_name='Simple Text Encryptor/Decryptor')
 def parse_arguments_and_select_mode():
-    parser = argparse.ArgumentParser(
-        description='A simple text encryptor/decryptor script by Taylor Whaley for Python for Networking course, 2024',
-        epilog="Note: See '<command> --help' to read how to use a specific mode."
-        )
+    parser = GooeyParser(
+        description='A simple text encryptor/decryptor script by Taylor Whaley for Python for Networking course, 2024')
     #The user has to select a mode so we know what arguments to require.
     subparsers = parser.add_subparsers(dest='mode', help='Mode to use - encrypt a file, decrypt a previously encrypted file, or generate a new key to use for encryption', required=True)
     #Encryption mode arguments - we need an input, an output, and a key.
     parser_encrypt = subparsers.add_parser('encrypt', help='Encrypt an unencrypted file')
-    parser_encrypt.add_argument('--in', type=str, dest='inputFile', help='Input file to encrypt', required=True)
-    parser_encrypt.add_argument('--out', type=str, help='Output file after encryption is performed', required=True)
-    parser_encrypt.add_argument('--key', type=str, help="Private key to use for encryption. If you don't have one yet, use the keygen mode first", required=True)
+    parser_encrypt.add_argument('--in', type=str, metavar="Input File", widget="FileChooser", dest='inputFile', help='File to encrypt', required=True)
+    parser_encrypt.add_argument('--out', type=str, widget="FileSaver", metavar="Output File", help='Select where to save encrypted file', required=True)
+    parser_encrypt.add_argument('--key', type=str, widget="FileChooser", metavar="Private Key", help="Private key to use for encryption. If you don't have one yet, use the keygen mode first", required=True)
     #Decryption mode arguments - we need an input, an output, and a key.
     parser_decrypt = subparsers.add_parser('decrypt', help='Decrypt an encrypted file')
-    parser_decrypt.add_argument('--in', type=str, dest='inputFile', help='Input file to decrypt', required=True)
-    parser_decrypt.add_argument('--out', type=str, help='Output file after decryption is performed', required=True)
-    parser_decrypt.add_argument('--key', type=str, help="Private key to use for decryption. This must be the same key that was used for encryption", required=True)
+    parser_decrypt.add_argument('--in', type=str, widget="FileChooser", metavar="Input File", dest='inputFile', help='Input file to decrypt', required=True)
+    parser_decrypt.add_argument('--out', type=str, widget="FileSaver", metavar="Output File", help='Select where to save decrypted file', required=True)
+    parser_decrypt.add_argument('--key', type=str, widget="FileChooser", metavar="Private Key", help="Private key to use for decryption. This must be the same key that was used for encryption", required=True)
     #Key generation mode arguments - We don't need anything, except an output file target if they want to specify one. Otherwise, we'll use a default location.
     parser_keygen = subparsers.add_parser('keygen', help='Generate a key file to use for encryption')
-    parser_keygen.add_argument('--out', type=str, help='Where to store the key after creation. (default: private.key)', default='private.key')
+    parser_keygen.add_argument('--out', widget="FileSaver", metavar="Private Key", type=str, help='Where to store the key after creation. (default: private.key)', default='private.key')
     #Parse the given arguments and select the appropriate mode
     args = parser.parse_args()
     modes = {
@@ -56,6 +56,7 @@ def encrypt_file(args):
     except Exception as e:
         print("Error while trying to encrypt file: ")
         print(e)
+        raise
 
 def decrypt_file(args):
     try:
@@ -75,6 +76,7 @@ def decrypt_file(args):
     except Exception as e:
         print("Error while trying to decrypt file: ")
         print(e)
+        raise
     
     
     print(args)
@@ -106,6 +108,7 @@ def generate_new_key(args):
             sys.exit(1) #Exit with error code because we didn't get the key generated
     except Exception as e:
         print(e)
+        raise
 
 def write_key_file(outputFile):
     try:
@@ -116,6 +119,7 @@ def write_key_file(outputFile):
     except PermissionError as e:
         print(e)
         print("This error typically occurs if the file specified in --out already exists but is a folder, not a file, thus it cannot be overwritten.")
+        raise
 
 def write_output_file(outputFile, content):
     try:
@@ -123,6 +127,7 @@ def write_output_file(outputFile, content):
             output.write(content)
     except Exception as e:
         print(e)
+        raise
 
 def read_file(filePath, binary=True):
     #With this function we can read files in binary or regular mode as desired.
@@ -134,7 +139,7 @@ def read_file(filePath, binary=True):
     except Exception as e:
         print(f"Error while reading file from {filePath}:")
         print(e)
-        sys.exit(1)
+        raise
 
 def read_key_file(keyFile):
     #Deprecated, remove once read_file is thoroughly tested
@@ -145,11 +150,11 @@ def read_key_file(keyFile):
     except Exception as e:
         print("Error while reading the key file:")
         print(e)
-        sys.exit(1)
+        raise
         
 if __name__ == "__main__":
     try:
         parse_arguments_and_select_mode()
     except KeyboardInterrupt:
         print("\nOperation cancelled by user.")
-        sys.exit(1)
+        raise
