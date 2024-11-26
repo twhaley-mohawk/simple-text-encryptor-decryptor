@@ -125,17 +125,6 @@ def read_file(filePath, binary=True):
         print(f"Error while reading file from {filePath}:")
         print(e)
         raise
-
-def read_key_file(keyFile):
-    #Deprecated, remove once read_file is thoroughly tested
-    try:
-        with open (keyFile, 'rb') as file:
-            key = file.read()
-            return key
-    except Exception as e:
-        print("Error while reading the key file:")
-        print(e)
-        raise
         
 if __name__ == "__main__":
     try:
