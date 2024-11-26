@@ -23,7 +23,7 @@ def parse_arguments_and_select_mode():
     parser_decrypt.add_argument('--key', type=str, widget="FileChooser", metavar="Private Key", help="Private key to use for decryption. This must be the same key that was used for encryption", required=True)
     #Key generation mode arguments - We don't need anything, except an output file target if they want to specify one. Otherwise, we'll use a default location.
     parser_keygen = subparsers.add_parser('keygen', help='Generate a key file to use for encryption')
-    parser_keygen.add_argument('--out', widget="FileSaver", metavar="Private Key", type=str, help='Where to store the key after creation. (default: private.key)', default='private.key')
+    parser_keygen.add_argument('--out', widget="FileSaver", metavar="Private Key", type=str, help='Where to store the key after creation.')
     #Parse the given arguments and select the appropriate mode
     args = parser.parse_args()
     modes = {
