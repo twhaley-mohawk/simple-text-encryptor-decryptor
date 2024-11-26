@@ -24,4 +24,4 @@ Then simply run with Python and you'll be presented with a simple GUI
 	
 Usage Notes
 -------------
-This project supports basic encryption/decryption using a 32-byte base64 encoded private key. If you don't have a private key already, you can quickly create one.
+This project supports basic encryption/decryption using a 32-byte base64 encoded private key. If you don't have a private key already, you can also use this to quickly create one.
