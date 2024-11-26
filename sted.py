@@ -75,11 +75,9 @@ def decrypt_file(args):
 def generate_new_key(args):
     try:
         outputFile = args.out
-        #If a file by the name of the key already exists, get confirmation before overwriting it.
         write_key_file(outputFile)
     except Exception as e:
-        print(e)
-        raise
+        sys.exit(f"An unexpected error occurred: {e}")
 
 class InvalidFernetKeyError(Exception):
     #We will raise a custom exception for private keys that are detected as invalid
@@ -102,8 +100,6 @@ def write_key_file(outputFile):
             keyFile.write(key)
         print(f"New private key created at {outputFile}")
     except PermissionError as e:
-        print(e)
-        print("This error typically occurs if the file specified in --out already exists but is a folder, not a file, thus it cannot be overwritten.")
         raise
 
 def write_output_file(outputFile, content):
