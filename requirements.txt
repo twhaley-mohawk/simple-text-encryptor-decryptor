@@ -1,0 +1,14 @@
+altgraph==0.17.4
+cffi==1.17.1
+colored==2.2.4
+cryptography==43.0.3
+Gooey==1.0.8.1
+numpy==2.1.3
+packaging==24.2
+pillow==11.0.0
+psutil==6.1.0
+pycparser==2.22
+pygtrie==2.5.0
+pyinstaller-hooks-contrib==2024.10
+six==1.16.0
+wxPython==4.2.2
