@@ -1,8 +1,8 @@
 import cryptography
 from cryptography.fernet import Fernet
-import argparse
 import os
 import sys
+import base64
 from gooey import Gooey, GooeyParser
 
 @Gooey(program_name='Simple Text Encryptor/Decryptor')
@@ -44,19 +44,16 @@ def encrypt_file(args):
         outputFile = args.out
         keyFile = args.key
         key = read_file(keyFile)
+        validate_fernet_key(key)
         key = Fernet(key)
         unencrypted_file = read_file(inputFile)
-        if check_if_output_file_exists(outputFile):
-            encryptedData = key.encrypt(unencrypted_file)
-            write_output_file(outputFile,encryptedData)
-            print(f"Encrypted contents written to {outputFile}")
-        else:
-            print("File encryption cancelled.")
-            sys.exit(1)
+        encryptedData = key.encrypt(unencrypted_file)
+        write_output_file(outputFile,encryptedData)
+        print(f"Encrypted contents written to {outputFile}")
+    except InvalidFernetKeyError as e:
+        sys.exit(f"Error encrypting file: {e}")
     except Exception as e:
-        print("Error while trying to encrypt file: ")
-        print(e)
-        raise
+        sys.exit(f"An unexpected error occurred: {e}")
 
 def decrypt_file(args):
     try:
@@ -64,51 +61,39 @@ def decrypt_file(args):
         outputFile = args.out
         keyFile = args.key
         key = read_file(keyFile)
+        validate_fernet_key(key)
         key = Fernet(key)
         encrypted_file = read_file(inputFile)
-        if check_if_output_file_exists(outputFile):
-            unencryptedData = key.decrypt(encrypted_file)
-            write_output_file(outputFile,unencryptedData)
-            print(f"Decrypted contents written to {outputFile}")
-        else:
-            print("File encryption cancelled.")
-            sys.exit(1)
+        unencryptedData = key.decrypt(encrypted_file)
+        write_output_file(outputFile,unencryptedData)
+        print(f"Decrypted contents written to {outputFile}")
+    except InvalidFernetKeyError as e:
+        sys.exit(f"Error encrypting file: {e}")
     except Exception as e:
-        print("Error while trying to decrypt file: ")
-        print(e)
-        raise
-    
-    
-    print(args)
+        sys.exit(f"An unexpected error occurred: {e}")
 
-def check_if_output_file_exists(outputFile):
-    #Here we check if the output file the user specified already exists or not. If it doesn't exist, all good, we can write.
-    #If it does already exist, the user must confirm before we proceed, so we are sure not to accidentally overwrite something important.
-    if os.path.exists(outputFile):
-        proceed_choice = ""
-        proceed_choices = ["yes", "y", "no", "n"]
-        while proceed_choice not in proceed_choices:
-            proceed_choice = input(f"A file at {outputFile} already exists - is it ok to overwrite it? (yes/no): ").strip().lower()
-        if proceed_choice in ["yes", "y"]:
-            print(f"Received confirmation to proceed. Overwriting file at {outputFile} with new key...")
-            return True
-        else:
-            return False
-    else:
-        return True
-        
 def generate_new_key(args):
     try:
         outputFile = args.out
         #If a file by the name of the key already exists, get confirmation before overwriting it.
-        if check_if_output_file_exists(outputFile):
-            write_key_file(outputFile)
-        else:
-            print("Key generation cancelled.")
-            sys.exit(1) #Exit with error code because we didn't get the key generated
+        write_key_file(outputFile)
     except Exception as e:
         print(e)
         raise
+
+class InvalidFernetKeyError(Exception):
+    #We will raise a custom exception for private keys that are detected as invalid
+    pass
+
+def validate_fernet_key(fernetKey):
+    try:
+        decodedKey = base64.urlsafe_b64decode(fernetKey)
+        if len(decodedKey) == 32:
+            return True
+        else:
+            return False
+    except (base64.binascii.Error, ValueError) as e:
+        raise InvalidFernetKeyError("Private key appears invalid. This program requires a 32-byte base64 url-safe key. To generate one, you can use the keygen function.")
 
 def write_key_file(outputFile):
     try:
